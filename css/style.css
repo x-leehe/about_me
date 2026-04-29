@@ -1,0 +1,269 @@
+:root {
+    /* 默认回退方案：Material Blue 深色系 */
+    --md-sys-color-primary: #a1c9ff;
+    --md-sys-color-on-primary: #00325b;
+    --md-sys-color-primary-container: #004881;
+    --md-sys-color-on-primary-container: #d2e4ff;
+    --md-sys-color-surface: #181a1b;
+    --md-sys-color-on-surface: #e2e2e6;
+    --md-sys-color-surface-variant: #43474e;
+    --md-sys-color-on-surface-variant: #c3c7cf;
+    --md-sys-color-outline: #8d9199;
+}
+
+body {
+    margin: 0;
+    background-color: transparent;
+    color: var(--md-sys-color-on-surface);
+    font-family: 'Roboto', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: color 0.3s ease;
+}
+
+centered {
+    text-align: center;
+}
+
+/* 背景处理 */
+#bg-canvas {
+    position: fixed;
+    top: -5%;
+    left: -5%;
+    width: 110%;
+    height: 110%;
+    z-index: 0;
+    object-fit: cover;
+    filter: brightness(0.4) blur(10px);
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+    transform-origin: center center;
+    will-change: transform;
+}
+
+.fallback-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    background-color: #181a1b;
+}
+
+/* 主容器 */
+.container {
+    width: 90%;
+    max-width: 400px;
+    background-color: rgba(28, 27, 31, 0.7);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--md-sys-color-outline);
+    border-radius: 28px;
+    padding: 32px;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    position: relative;
+    z-index: 1;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 响应式布局 - 在足够宽的屏幕上使用左右布局 */
+@media (min-width: 768px) {
+    .container {
+        max-width: 800px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 40px;
+        text-align: left;
+        padding: 40px;
+    }
+    
+    .profile-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .nav-section {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+}
+
+.avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 3px solid var(--md-sys-color-primary);
+    padding: 4px;
+    margin-bottom: 16px;
+    object-fit: cover;
+    transition: border-color 0.3s ease;
+}
+
+h1 { font-size: 1.5rem; font-weight: 500; margin: 8px 0; letter-spacing: 0.2px; }
+.bio { font-size: 0.9rem; color: var(--md-sys-color-on-surface-variant); margin-bottom: 24px; }
+
+/* MD3 Chips (标签) */
+.tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 32px; }
+.tag {
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    padding: 6px 16px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+/* 在大屏幕上调整标签对齐 */
+@media (min-width: 768px) {
+    .tags {
+        justify-content: center; /* 保持居中对齐 */
+    }
+}
+
+/* 导航链接 */
+.link-card {
+    background-color: var(--md-sys-color-surface-variant);
+    color: var(--md-sys-color-on-surface);
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    border-radius: 16px;
+    text-decoration: none;
+    margin-bottom: 12px;
+    transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.link-card:hover {
+    background-color: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    transform: scale(1.02);
+}
+
+.link-card .material-symbols-outlined {
+    width: 24px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+}
+
+.link-card .material-symbols-outlined:first-child {
+    margin-right: 12px;
+}
+
+.link-text { 
+    flex-grow: 1; 
+    text-align: left; 
+    font-weight: 500; 
+    font-size: 0.95rem; /* 统一主项目字体大小 */
+}
+
+/* 在大屏幕上调整导航链接样式 */
+@media (min-width: 768px) {
+    .link-card {
+        margin-bottom: 0; /* 在flex布局中移除底部边距 */
+    }
+}
+
+/* 下拉菜单样式 */
+.dropdown {
+    position: relative;
+    width: 100%;
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* 在大屏幕上调整下拉菜单样式 */
+@media (min-width: 768px) {
+    .dropdown {
+        margin-bottom: 0; /* 在flex布局中移除底部边距 */
+        align-items: stretch; /* 拉伸对齐以适应导航区域 */
+    }
+}
+
+.dropdown-trigger {
+    cursor: pointer;
+    margin-bottom: 0;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.dropdown-trigger .arrow {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dropdown.active .dropdown-trigger .arrow {
+    transform: rotate(180deg);
+}
+
+.dropdown-content {
+    display: none;
+    background-color: var(--md-sys-color-surface-variant);
+    border-radius: 16px;
+    margin-top: 8px;
+    overflow: hidden;
+    width: 85%; /* 子项目比主项目窄 */
+    animation: fadeInDown 0.3s ease;
+    border: 1px solid rgba(var(--md-sys-color-outline), 0.1);
+}
+
+/* Music下拉菜单特殊样式 - 透明背景 */
+.music-dropdown .dropdown-content {
+    background-color: transparent;
+    border: none;
+    width: 100%;
+}
+
+.dropdown.active .dropdown-content {
+    display: block;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    color: var(--md-sys-color-on-surface);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    font-size: 0.95rem; /* 统一子项目字体大小 */
+    font-weight: 500;
+}
+
+.dropdown-item:hover {
+    background-color: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+}
+
+.dropdown-item .material-symbols-outlined {
+    margin-right: 12px;
+    font-size: 22px; /* 稍微缩小图标使其与文字更协调 */
+    width: 24px;
+    display: flex;
+    justify-content: center;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 移动端细微调整 */
+@media (max-width: 480px) {
+    .container { padding: 24px; }
+}
