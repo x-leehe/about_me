@@ -1,22 +1,43 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About X-LeeHe</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+
+    <!-- 优先预加载首张背景图 -->
+    <link rel="preload" as="image" href="./assets/background.png" crossorigin="anonymous">
+
+    <!-- 字体通过 jsDelivr CDN 加载（国内可访问） -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/harmonyos-sans@5/index.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/material-symbols@latest/outlined.css">
+
+    <!-- 本地样式优先加载 -->
     <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
 
     <div class="fallback-bg"></div>
+    <img id="bg-canvas-back" src="./assets/background.png" alt="" crossorigin="anonymous">
     <img id="bg-canvas" src="./assets/background.png" alt="Background" crossorigin="anonymous">
-    
+
+    <!-- 背景轮换控制 -->
+    <div class="bg-controls" id="bg-controls">
+        <button class="bg-arrow bg-prev" id="bg-prev" title="上一张">
+            <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+        <div class="bg-dots" id="bg-dots"></div>
+        <button class="bg-arrow bg-next" id="bg-next" title="下一张">
+            <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+    </div>
+
     <main class="container">
         <div class="profile-section">
             <img src="./assets/avatar.jpg" class="avatar" alt="User">
-            
+
             <p class="centered">Hi, I am</p>
             <h1>X-LeeHe</h1>
             <p class="bio">警惕赛博杂食性动物</p>
@@ -36,7 +57,7 @@
                 <div class="link-text">Github</div>
                 <span class="material-symbols-outlined">chevron_right</span>
             </a>
-            <a href="#" class="link-card">
+            <a href="https://x-leehe.ccwu.cc/#" class="link-card">
                 <span class="material-symbols-outlined">web</span>
                 <div class="link-text">Blog</div>
                 <span class="material-symbols-outlined">chevron_right</span>
@@ -56,13 +77,13 @@
                         <span class="material-symbols-outlined">mail</span>
                         <span>Mail</span>
                     </a>
-                    <a href="https://steamcommunity.com/id/yourid" class="dropdown-item">
+                    <a href="https://steamcommunity.com/id/x-leehe" class="dropdown-item">
                         <span class="material-symbols-outlined">sports_esports</span>
                         <span>Steam</span>
                     </a>
                 </div>
             </div>
-                <div class="dropdown music-dropdown">
+            <div class="dropdown music-dropdown">
                 <div class="link-card dropdown-trigger">
                     <span class="material-symbols-outlined">music_note</span>
                     <div class="link-text">Music (From NetEase)</div>
@@ -73,15 +94,11 @@
                     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css">
                     <script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
                     <!-- require MetingJS -->
-                    <script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
+                    <script src="https://cdn.jsdelivr.net/npm/@xizeyoupan/meting@latest/dist/Meting.min.js"></script>
 
-                    <meting-js
-                        server="netease"
-                        type="playlist"
-                        id="912199427"
-                        api="https://api.injahow.cn/meting/?server=:server&type=:type&id=:id&r=:r"
-                        list-folded="true">
+                    <meting-js server="netease" type="playlist" id="912199427" list-folded="true">
                     </meting-js>
+                    <!-- 在网易云音乐上创建一个歌单，然后将歌单ID填入id属性中 -->
                 </div>
             </div>
         </nav>
@@ -89,6 +106,7 @@
     </main>
 
     <script src="js/script.js"></script>
-    
+
 </body>
+
 </html>

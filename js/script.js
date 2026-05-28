@@ -1,4 +1,121 @@
 /**
+ * 背景轮换引擎
+ */
+const BG_IMAGES = [
+    './assets/background.png'
+];
+
+let currentBgIndex = 0;
+let autoRotateTimer = null;
+const AUTO_ROTATE_INTERVAL = 8000; // 自动轮换间隔（毫秒），设为 0 禁用自动轮换
+
+function initBgRotation() {
+    const bgCanvas = document.getElementById('bg-canvas');
+    const prevBtn = document.getElementById('bg-prev');
+    const nextBtn = document.getElementById('bg-next');
+    const dotsContainer = document.getElementById('bg-dots');
+
+    if (!bgCanvas || BG_IMAGES.length <= 1) {
+        // 只有一张图时隐藏控制器
+        const controls = document.getElementById('bg-controls');
+        if (controls) controls.style.display = 'none';
+        document.body.classList.add('no-bg-controls');
+        return;
+    }
+
+    // 创建指示点
+    function renderDots() {
+        dotsContainer.innerHTML = '';
+        BG_IMAGES.forEach((_, i) => {
+            const dot = document.createElement('div');
+            dot.className = 'bg-dot' + (i === currentBgIndex ? ' active' : '');
+            dot.addEventListener('click', () => switchToBg(i));
+            dotsContainer.appendChild(dot);
+        });
+    }
+
+    const bgBack = document.getElementById('bg-canvas-back');
+
+    // 切换到指定背景（双图层交叉淡入淡出）
+    function switchToBg(index) {
+        if (index === currentBgIndex || index < 0 || index >= BG_IMAGES.length) return;
+
+        currentBgIndex = index;
+        const nextSrc = BG_IMAGES[index];
+
+        // 预加载新图到后层
+        const preload = new Image();
+        preload.src = nextSrc;
+
+        function doCrossfade() {
+            // 后层换上新图
+            bgBack.src = nextSrc;
+            // 同时：后层淡入 + 前层淡出（交叉过渡）
+            bgBack.style.opacity = '1';
+            bgCanvas.style.opacity = '0';
+
+            // 过渡完成后交换：前层换新图恢复显示，后层隐藏
+            setTimeout(() => {
+                bgCanvas.src = nextSrc;
+                bgCanvas.style.opacity = '1';
+                bgBack.style.opacity = '0';
+            }, 850);
+        }
+
+        if (preload.complete) {
+            doCrossfade();
+        } else {
+            preload.onload = doCrossfade;
+        }
+
+        // 更新指示点
+        renderDots();
+
+        // 重置自动轮换计时器
+        resetAutoRotate();
+    }
+
+    // 上一张
+    function prevBg() {
+        const newIndex = (currentBgIndex - 1 + BG_IMAGES.length) % BG_IMAGES.length;
+        switchToBg(newIndex);
+    }
+
+    // 下一张
+    function nextBg() {
+        const newIndex = (currentBgIndex + 1) % BG_IMAGES.length;
+        switchToBg(newIndex);
+    }
+
+    // 自动轮换
+    function startAutoRotate() {
+        if (AUTO_ROTATE_INTERVAL <= 0 || BG_IMAGES.length <= 1) return;
+        autoRotateTimer = setInterval(() => {
+            nextBg();
+        }, AUTO_ROTATE_INTERVAL);
+    }
+
+    function resetAutoRotate() {
+        if (autoRotateTimer) clearInterval(autoRotateTimer);
+        startAutoRotate();
+    }
+
+    // 绑定事件
+    prevBtn.addEventListener('click', prevBg);
+    nextBtn.addEventListener('click', nextBg);
+
+    // 键盘左右箭头切换
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') prevBg();
+        if (e.key === 'ArrowRight') nextBg();
+    });
+
+    // 初始化
+    renderDots();
+    startAutoRotate();
+}
+
+/**
  * 背景随鼠标移动效果
  */
 function initMouseTracker() {
@@ -59,17 +176,83 @@ function initDropdown() {
     });
 }
 
+/**
+ * 链接预览卡片 — 使用内联 data-preview-* 属性填充
+ *
+ * 每个 .link-preview-card 通过 HTML 中的 data-preview-title / desc / host / image
+ * 提供预览元数据，页面加载即显示，无需网络请求。
+ */
+async function initLinkPreviews() {
+    const cards = document.querySelectorAll('.link-preview-card');
+    if (!cards.length) return;
+
+    const promises = Array.from(cards).map((card) => {
+        return applyInlinePreview(card);
+    });
+    await Promise.allSettled(promises);
+}
+
+/** 使用 HTML 内联 data-preview-* 属性填充卡片（零网络请求） */
+function applyInlinePreview(card) {
+    const title = card.getAttribute('data-preview-title');
+    const host = card.getAttribute('data-preview-host');
+    const image = card.getAttribute('data-preview-image');
+
+    const titleEl = card.querySelector('.preview-title');
+    const descEl = card.querySelector('.preview-desc');
+    const urlEl = card.querySelector('.preview-url-top');
+
+    if (titleEl && title) titleEl.textContent = title;
+    if (urlEl && host) urlEl.textContent = host;
+
+    // 用 hasAttribute 而非 truthiness，支持 og:description 为空字符串的情况
+    if (descEl && card.hasAttribute('data-preview-desc')) {
+        descEl.textContent = card.getAttribute('data-preview-desc');
+    }
+
+    if (image) return tryLoadThumbnail(card, image);
+    return Promise.resolve();
+}
+
+/**
+ * 尝试加载远程图片作为缩略图。
+ * 成功 → 给 .preview-thumb 加 .has-image 类，显示 <img>，隐藏图标
+ * 失败 → 保持 Material Symbol 图标
+ */
+function tryLoadThumbnail(card, imageUrl) {
+    return new Promise((resolve) => {
+        const thumb = card.querySelector('.preview-thumb');
+        const img = card.querySelector('.preview-favicon');
+        if (!thumb || !img) return resolve();
+
+        const testImg = new Image();
+        testImg.onload = () => {
+            img.src = imageUrl;
+            thumb.classList.add('has-image');
+            resolve();
+        };
+        testImg.onerror = () => {
+            resolve();
+        };
+        testImg.src = imageUrl;
+    });
+}
+
 // 在DOM加载完成后执行
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         initDropdown();
         initBackgroundEngine();
+        initBgRotation();
         initMouseTracker();
+        initLinkPreviews();
     });
 } else {
     initDropdown();
     initBackgroundEngine();
+    initBgRotation();
     initMouseTracker();
+    initLinkPreviews();
 }
 
 /**
@@ -113,21 +296,45 @@ function initBackgroundEngine() {
             // 获取采样区域的所有像素数据
             const imageData = ctx.getImageData(0, 0, sampleSize, sampleSize);
             const data = imageData.data;
-            
-            // 计算平均RGB（忽略透明度）
-            let r = 0, g = 0, b = 0;
             const pixelCount = data.length / 4;
-            
+
+            // --- 改进取色：筛选高饱和度像素取加权平均 ---
+            let totalWeight = 0;
+            let wr = 0, wg = 0, wb = 0;
+
             for (let i = 0; i < data.length; i += 4) {
-                r += data[i];
-                g += data[i + 1];
-                b += data[i + 2];
+                const ri = data[i], gi = data[i + 1], bi = data[i + 2];
+                // 计算该像素的饱和度（用 max-min 近似）
+                const maxC = Math.max(ri, gi, bi);
+                const minC = Math.min(ri, gi, bi);
+                const chroma = maxC - minC;
+
+                // 饱和度越高权重越大（平方放大差异），纯灰像素权重极低
+                const weight = chroma * chroma + 1;
+
+                wr += ri * weight;
+                wg += gi * weight;
+                wb += bi * weight;
+                totalWeight += weight;
             }
-            
-            r = Math.round(r / pixelCount);
-            g = Math.round(g / pixelCount);
-            b = Math.round(b / pixelCount);
-            
+
+            let r = Math.round(wr / totalWeight);
+            let g = Math.round(wg / totalWeight);
+            let b = Math.round(wb / totalWeight);
+
+            // 二次提纯：忽略过暗/过亮的像素带来的偏移
+            const [, rawS] = rgbToHsl(r, g, b);
+            if (rawS < 10) {
+                // 如果加权后仍然偏灰，取原始平均作为兜底
+                let ar = 0, ag = 0, ab = 0;
+                for (let i = 0; i < data.length; i += 4) {
+                    ar += data[i]; ag += data[i + 1]; ab += data[i + 2];
+                }
+                r = Math.round(ar / pixelCount);
+                g = Math.round(ag / pixelCount);
+                b = Math.round(ab / pixelCount);
+            }
+
             console.log(`Extracted accent color - R: ${r}, G: ${g}, B: ${b}`);
             window.lastExtractedColor = {r, g, b};
             updateColors(r, g, b);
@@ -145,27 +352,29 @@ function initBackgroundEngine() {
 }
 
 /**
- * 根据提取的 RGB 更新全局 CSS 变量
+ * 根据提取的 RGB 更新全局 CSS 变量（高饱和鲜艳版）
  */
 function updateColors(r, g, b) {
-    const [h, s, l] = rgbToHsl(r, g, b);
-    
-    // 提升饱和度以获得更鲜艳的颜色
-    // 如果饱和度过低（灰色背景），使用更高的默认饱和度
-    let targetSaturation = s < 15 ? 60 : Math.min(s * 1.3, 100);  // 提升饱和度到最多 130%
+    const [h, rawS, rawL] = rgbToHsl(r, g, b);
+
+    // 大幅提升饱和度：低饱和图片也能产出鲜艳配色
+    let s = rawS < 10 ? 55 : Math.min(rawS * 1.6, 100);
+    s = Math.max(s, 45); // 最低 45%，确保不会太灰
+
     const root = document.documentElement;
 
-    // 深色模式色彩配置 - 使用更高的饱和度获得更鲜艳的效果
-    const primary = `hsl(${h}, ${Math.max(targetSaturation, 50)}%, 75%)`;
-    const onPrimary = `hsl(${h}, ${targetSaturation}%, 15%)`;
-    const primaryContainer = `hsl(${h}, ${Math.max(targetSaturation, 45)}%, 35%)`;
-    const onPrimaryContainer = `hsl(${h}, ${Math.max(targetSaturation, 40)}%, 95%)`;
-    
-    const surface = `hsl(${h}, 10%, 10%)`;
-    const onSurface = `hsl(${h}, 10%, 90%)`;
-    const surfaceVariant = `hsl(${h}, 15%, 25%)`;
-    const onSurfaceVariant = `hsl(${h}, 10%, 80%)`;
-    const outline = `hsl(${h}, 10%, 60%)`;
+    // 主色：明亮鲜艳
+    const primary       = `hsl(${h}, ${s}%, 72%)`;
+    const onPrimary     = `hsl(${h}, ${s}%, 12%)`;
+    const primaryContainer = `hsl(${h}, ${s}%, 32%)`;
+    const onPrimaryContainer = `hsl(${h}, ${Math.min(s + 5, 100)}%, 95%)`;
+
+    // 背景层：带一点主色色相 + 适度饱和度，比纯灰更生动
+    const surface       = `hsl(${h}, ${Math.min(s * 0.25, 25)}%, 10%)`;
+    const onSurface     = `hsl(${h}, ${Math.min(s * 0.2, 20)}%, 90%)`;
+    const surfaceVariant = `hsl(${h}, ${Math.min(s * 0.35, 35)}%, 22%)`;
+    const onSurfaceVariant = `hsl(${h}, ${Math.min(s * 0.25, 25)}%, 82%)`;
+    const outline       = `hsl(${h}, ${Math.min(s * 0.3, 30)}%, 58%)`;
 
     root.style.setProperty('--md-sys-color-primary', primary);
     root.style.setProperty('--md-sys-color-on-primary', onPrimary);
@@ -176,8 +385,13 @@ function updateColors(r, g, b) {
     root.style.setProperty('--md-sys-color-surface-variant', surfaceVariant);
     root.style.setProperty('--md-sys-color-on-surface-variant', onSurfaceVariant);
     root.style.setProperty('--md-sys-color-outline', outline);
-    
-    console.log(`Applied vibrant dark mode colors - H: ${h}°, S: ${targetSaturation}%`);
+
+    console.log(`Applied vibrant colors - H: ${h}°, S: ${s.toFixed(0)}%`);
+
+    // 同步 APlayer 主题色
+    if (typeof window.syncAPlayerTheme === 'function') {
+        setTimeout(window.syncAPlayerTheme, 100);
+    }
 }
 
 /**
@@ -202,3 +416,93 @@ function rgbToHsl(r, g, b) {
     }
     return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)];
 }
+
+/**
+ * APlayer 主题同步引擎
+ * 当页面动态色彩变化时，同步更新 APlayer 的主题色
+ */
+(function initAPlayerSync() {
+    let aplayerSynced = false;
+
+    /**
+     * 从 CSS 变量读取当前主色并应用到 APlayer
+     */
+    function applyThemeToAPlayer() {
+        const metingEl = document.querySelector('meting-js');
+        if (!metingEl || !metingEl.aplayer) return;
+
+        const aplayer = metingEl.aplayer;
+        const style = getComputedStyle(document.documentElement);
+        const primary = style.getPropertyValue('--md-sys-color-primary').trim();
+
+        if (primary) {
+            // 直接操作 DOM 更新已播放进度条颜色（不覆盖 aplayer.theme，避免破坏内部方法）
+            const playedBar = metingEl.querySelector('.aplayer-played');
+            const thumb = metingEl.querySelector('.aplayer-thumb');
+            if (playedBar) playedBar.style.background = primary;
+            if (thumb) {
+                thumb.style.background = primary;
+                thumb.style.borderColor = primary;
+            }
+        }
+    }
+
+    /**
+     * 使用 MutationObserver 监听 APlayer 的创建
+     */
+    function watchAPlayerCreation() {
+        const musicDropdown = document.querySelector('.music-dropdown');
+        if (!musicDropdown) return;
+
+        const observer = new MutationObserver((mutations) => {
+            for (const mutation of mutations) {
+                if (mutation.type === 'childList') {
+                    for (const node of mutation.addedNodes) {
+                        if (node.nodeType === Node.ELEMENT_NODE) {
+                            // MetingJS 注入的 aplayer 容器
+                            const aplayerEl = (node.matches && node.matches('div.aplayer'))
+                                ? node
+                                : node.querySelector && node.querySelector('div.aplayer');
+
+                            if (aplayerEl && !aplayerSynced) {
+                                // 延迟确保 APlayer 完全初始化
+                                setTimeout(() => {
+                                    applyThemeToAPlayer();
+                                    aplayerSynced = true;
+                                    observer.disconnect();
+                                }, 500);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        observer.observe(musicDropdown, { childList: true, subtree: true });
+
+        // 兜底：如果 APlayer 已经创建好了（缓存情况）
+        setTimeout(() => {
+            if (!aplayerSynced) {
+                const metingEl = document.querySelector('meting-js');
+                if (metingEl && metingEl.aplayer) {
+                    applyThemeToAPlayer();
+                    aplayerSynced = true;
+                    observer.disconnect();
+                }
+            }
+        }, 2000);
+    }
+
+    // 将 applyThemeToAPlayer 挂到 window 上，供 updateColors 调用
+    window.syncAPlayerTheme = function () {
+        applyThemeToAPlayer();
+    };
+
+    // 启动监听
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', watchAPlayerCreation);
+    } else {
+        watchAPlayerCreation();
+    }
+})();
