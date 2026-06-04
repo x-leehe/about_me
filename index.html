@@ -7,11 +7,10 @@
     <title>About X-LeeHe</title>
 
     <!-- 优先预加载首张背景图 -->
-    <link rel="preload" as="image" href="./assets/background.png" crossorigin="anonymous">
+    <link rel="preload" as="image" href="./assets/background.png">
 
     <!-- 字体通过 jsDelivr CDN 加载（国内可访问） -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/harmonyos-sans@5/index.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/material-symbols@latest/outlined.css">
 
     <!-- 本地样式优先加载 -->
     <link rel="stylesheet" href="css/style.css">
@@ -20,17 +19,17 @@
 <body>
 
     <div class="fallback-bg"></div>
-    <img id="bg-canvas-back" src="./assets/background.png" alt="" crossorigin="anonymous">
-    <img id="bg-canvas" src="./assets/background.png" alt="Background" crossorigin="anonymous">
+    <img id="bg-canvas-back" src="./assets/background.png" alt="">
+    <img id="bg-canvas" src="./assets/background.png" alt="Background">
 
     <!-- 背景轮换控制 -->
     <div class="bg-controls" id="bg-controls">
         <button class="bg-arrow bg-prev" id="bg-prev" title="上一张">
-            <span class="material-symbols-outlined">chevron_left</span>
+            <span class="icon icon-chevron_left"></span>
         </button>
         <div class="bg-dots" id="bg-dots"></div>
         <button class="bg-arrow bg-next" id="bg-next" title="下一张">
-            <span class="material-symbols-outlined">chevron_right</span>
+            <span class="icon icon-chevron_right"></span>
         </button>
     </div>
 
@@ -53,41 +52,41 @@
 
         <nav class="nav-section">
             <a href="https://github.com/x-leehe" class="link-card">
-                <span class="material-symbols-outlined">code</span>
+                <span class="icon icon-code"></span>
                 <div class="link-text">Github</div>
-                <span class="material-symbols-outlined">chevron_right</span>
+                <span class="icon icon-chevron_right"></span>
             </a>
-            <a href="https://x-leehe.ccwu.cc/#" class="link-card">
-                <span class="material-symbols-outlined">web</span>
+            <a href="https://blog.x-leehe.ccwu.cc/" class="link-card">
+                <span class="icon icon-web"></span>
                 <div class="link-text">Blog</div>
-                <span class="material-symbols-outlined">chevron_right</span>
+                <span class="icon icon-chevron_right"></span>
             </a>
             <div class="dropdown">
                 <div class="link-card dropdown-trigger">
-                    <span class="material-symbols-outlined">scatter_plot</span>
+                    <span class="icon icon-scatter_plot"></span>
                     <div class="link-text">More</div>
-                    <span class="material-symbols-outlined arrow">expand_more</span>
+                    <span class="icon icon-expand_more arrow"></span>
                 </div>
                 <div class="dropdown-content">
                     <a href="https://t.me/about_leehe" class="dropdown-item">
-                        <span class="material-symbols-outlined">send</span>
+                        <span class="icon icon-send"></span>
                         <span>TeleGram</span>
                     </a>
                     <a href="mailto:x-leehe@outlook.com" class="dropdown-item">
-                        <span class="material-symbols-outlined">mail</span>
+                        <span class="icon icon-mail"></span>
                         <span>Mail</span>
                     </a>
                     <a href="https://steamcommunity.com/id/x-leehe" class="dropdown-item">
-                        <span class="material-symbols-outlined">sports_esports</span>
+                        <span class="icon icon-sports_esports"></span>
                         <span>Steam</span>
                     </a>
                 </div>
             </div>
             <div class="dropdown music-dropdown">
                 <div class="link-card dropdown-trigger">
-                    <span class="material-symbols-outlined">music_note</span>
+                    <span class="icon icon-music_note"></span>
                     <div class="link-text">Music (From NetEase)</div>
-                    <span class="material-symbols-outlined arrow">expand_more</span>
+                    <span class="icon icon-expand_more arrow"></span>
                 </div>
                 <div class="dropdown-content">
                     <!-- require APlayer -->
@@ -96,7 +95,7 @@
                     <!-- require MetingJS -->
                     <script src="https://cdn.jsdelivr.net/npm/@xizeyoupan/meting@latest/dist/Meting.min.js"></script>
 
-                    <meting-js server="netease" type="playlist" id="912199427" list-folded="true">
+                    <meting-js api="https://meting.x-leehe.ccwu.cc/api?server=:server&type=:type&id=:id&auth=:auth&r=:r" server="netease" type="playlist" id="912199427" list-folded="true">
                     </meting-js>
                     <!-- 在网易云音乐上创建一个歌单，然后将歌单ID填入id属性中 -->
                 </div>

@@ -211,14 +211,42 @@ h1 { font-size: 1.5rem; font-weight: 500; margin: 8px 0; letter-spacing: 0.2px; 
     transform: scale(1.02);
 }
 
-.link-card .material-symbols-outlined {
+/* ============================================================
+   图标系统 — 使用 CSS mask 从本地 SVG 渲染，自动继承 color
+   ============================================================ */
+.icon {
+    display: inline-block;
     width: 24px;
-    text-align: center;
-    display: flex;
-    justify-content: center;
+    height: 24px;
+    flex-shrink: 0;
+    background-color: currentColor;
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
 }
 
-.link-card .material-symbols-outlined:first-child {
+/* 各图标 mask 引用 */
+.icon-chevron_left  { mask-image: url('../assets/icons/chevron_left.svg');  -webkit-mask-image: url('../assets/icons/chevron_left.svg'); }
+.icon-chevron_right { mask-image: url('../assets/icons/chevron_right.svg'); -webkit-mask-image: url('../assets/icons/chevron_right.svg'); }
+.icon-code          { mask-image: url('../assets/icons/code.svg');          -webkit-mask-image: url('../assets/icons/code.svg'); }
+.icon-web           { mask-image: url('../assets/icons/web.svg');           -webkit-mask-image: url('../assets/icons/web.svg'); }
+.icon-scatter_plot  { mask-image: url('../assets/icons/scatter_plot.svg');  -webkit-mask-image: url('../assets/icons/scatter_plot.svg'); }
+.icon-expand_more   { mask-image: url('../assets/icons/expand_more.svg');   -webkit-mask-image: url('../assets/icons/expand_more.svg'); }
+.icon-send          { mask-image: url('../assets/icons/send.svg');          -webkit-mask-image: url('../assets/icons/send.svg'); }
+.icon-mail          { mask-image: url('../assets/icons/mail.svg');          -webkit-mask-image: url('../assets/icons/mail.svg'); }
+.icon-sports_esports{ mask-image: url('../assets/icons/sports_esports.svg');-webkit-mask-image: url('../assets/icons/sports_esports.svg'); }
+.icon-music_note    { mask-image: url('../assets/icons/music_note.svg');    -webkit-mask-image: url('../assets/icons/music_note.svg'); }
+
+.link-card .icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.link-card .icon:first-child {
     margin-right: 12px;
 }
 
@@ -309,12 +337,11 @@ h1 { font-size: 1.5rem; font-weight: 500; margin: 8px 0; letter-spacing: 0.2px; 
     color: var(--md-sys-color-on-primary);
 }
 
-.dropdown-item .material-symbols-outlined {
+.dropdown-item .icon {
     margin-right: 12px;
-    font-size: 22px; /* 稍微缩小图标使其与文字更协调 */
-    width: 24px;
-    display: flex;
-    justify-content: center;
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
 }
 
 @keyframes fadeInDown {
@@ -356,8 +383,9 @@ h1 { font-size: 1.5rem; font-weight: 500; margin: 8px 0; letter-spacing: 0.2px; 
         width: 18px;
     }
 
-    .bg-arrow .material-symbols-outlined {
-        font-size: 20px;
+    .bg-arrow .icon {
+        width: 20px;
+        height: 20px;
     }
 }
 
